@@ -1,0 +1,135 @@
+<!doctype html>
+
+<head>
+    <style>
+        /* CSS comes here */
+        body {
+            font-family: arial;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #E6B0AA;
+            color: #050200;
+            border: 0px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        #output {
+            background-color: #F8E1D6;
+            padding: 10px;
+            width: 100%;
+            margin-top: 20px;
+            line-height: 30px;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        .show {
+            display: block;
+        }
+
+        p {
+            text-align: center;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        p1 {
+            font-size: 14px;
+            text-align: center;
+        }
+        .ard-center{
+            text-align: center;
+
+        }
+    </style>
+    <title>JavaScript Speech to Text & Connect to Arduino</title>
+</head>
+
+<body>
+    <h2>JavaScript Speech to Text</h2>
+    <p style="font-family:'Courier New'">Click on the button and Start speaking to convert your speech to text .</p>
+    <p> انقر الزر أدناه وتحدث من فضلك </p>
+    <p><button type="button" onclick="runSpeechRecognition()">Speech to Text</button> &nbsp; <span id="action"></span>
+    </p>
+    <div id="output" class="hide"></div>
+   
+    <script>
+        /* JS comes here Script for the first button Recording */
+        function runSpeechRecognition() {
+            // get output div reference
+            var output = document.getElementById("output");
+            // get action element reference
+            var action = document.getElementById("action");
+            // new speech recognition object
+            var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
+            var recognition = new SpeechRecognition();
+
+            // This runs when the speech recognition service starts
+            recognition.onstart = function () {
+                action.innerHTML = "<small>listening, please speak...</small>";
+            };
+
+            recognition.onspeechend = function () {
+                action.innerHTML = "<small>stopped listening, hope you are done...</small>";
+                recognition.stop();
+            }
+
+            // This runs when the speech recognition service returns result
+            recognition.onresult = function (event) {
+                var transcript = event.results[0][0].transcript;
+                var confidence = event.results[0][0].confidence;
+                output.innerHTML = "<b>Text:</b> " + transcript + "<br/> <b>Confidence:</b> " + confidence * 100 + "%";
+                output.classList.remove("hide");
+            };
+            recognition.lang = 'ar';
+
+            // start recognition
+            recognition.start();
+            
+
+        }
+    </script>
+   
+    <body>
+   
+        <section id="controls">
+        <div class="ard-center">
+          <button onclick="onConnectUsb()" id="connect-usb">Connect to Arduino </button> 
+        </div>
+        </section>
+        <script>
+          let isConnectted = false;
+          let port;
+          let writer;
+          const enc = new TextEncoder();
+    
+    
+          async function onConnectUsb() {
+            try {
+              const requestOptions = {
+                // Filter on devices with the Arduino USB vendor ID.
+                filters: [{ usbVendorId: 0x2341 }],
+              };
+    
+              // Request an Arduino from the user.
+              port = await navigator.serial.requestPort(requestOptions);
+              await port.open({ baudrate: 115200 });
+              writer = port.writable.getWriter();
+              isConnectted = true;
+            } catch (e) {
+              console.log("err", e);
+            }
+          }
+
+        </script>
+         <p style="font-family:'Courier New'">Done by: Basayl Suliman Ali .</p>
+</body>
+
+</html>
